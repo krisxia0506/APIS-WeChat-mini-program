@@ -1,59 +1,106 @@
 // pages/list.js
 Page({
     promiseClick(building, room) {
-        var building_id2post = {
-            1: '1-9--10-',
-            2: '1-10--11-',
-            3: '1-11--12-',
-            4: '1-12--9-',
-            5: '1-3--3-',
-            6: '1-1--1-',
-            7: '1-4--8-',
-            8: '1-5--4-',
-            9: '1-6--5-',
-            10: '1-7--6-',
-            11: '1-8--7-'
-        }
+
+        // wx.showLoading({
+        //     title: '查询中',
+        // })
+        // //console.log('楼号选择是',building_id2post[1])
+        // let p = new Promise(function (resolve) {
+        //     wx.request({
+        //         url: 'http://localhost:80801/electricityLevel?buildingID=' + building +'&roomID='+ room,
+        //         method: "GET",
+        //         dataType: JSON,
+        //         success: (res) => {
+        //             console.log(res.data)
+        //             //捕获json.pause异常
+        //             try {
+        //                 //判断查询结果json的returncode字段
+        //                 if (JSON.parse(res.data).returncode == '100') {
+        //                     //查询成果返回json的quantity字段 
+        //                     resolve(JSON.parse(res.data).quantity)
+        //                 } else if (JSON.parse(res.data).returncode == '-600') {
+        //                     resolve('-600')
+        //                 } else {
+        //                     resolve('no-room')
+        //                     //console.log(JSON.parse(res.data).quantity)
+        //                 }
+        //             } catch (e) {
+        //                 console.log(e.message);
+        //                 wx.hideLoading();
+        //                 resolve('error')
+        //             }
+        //         },
+
+        //     })
+        // });
+        // 方法1
         wx.showLoading({
             title: '查询中',
         })
-        //console.log('楼号选择是',building_id2post[1])
+        
+        // 封装请求为 Promise
+        function requestWithPromise(url, method) {
+            return new Promise(function (resolve, reject) {
+                wx.request({
+                    url: url,
+                    method: method,
+                    dataType: 'json', // 修改为字符串 'json'
+                    success: (res) => {
+                        resolve(res.data);
+                    },
+                    fail: (err) => {
+                        reject(err);
+                    },
+                });
+            });
+        }
+        
+        // 使用封装的请求函数
         let p = new Promise(function (resolve) {
-            wx.request({
-                url: 'https://test.topxls.cn/curl.php?cs=' + building_id2post[building] + room,
-                method: "GET",
-                dataType: JSON,
-                success: (res) => {
-                    //捕获json.pause异常
+            requestWithPromise('http://localhost:8080/electricityLevel?buildingID=' + building + '&roomID=' + room, 'GET')
+                .then((res) => {
+                    console.log(res);
                     try {
-                        //判断查询结果json的returncode字段
-                        if (JSON.parse(res.data).returncode == '100') {
-                            //查询成果返回json的quantity字段 
-                            resolve(JSON.parse(res.data).quantity)
-                        } else if (JSON.parse(res.data).returncode == '-600') {
-                            resolve('-600')
+                        // 判断查询结果 json 的 returncode 字段
+                        if (res.returncode === '100') {
+                            // 查询成功返回 json 的 quantity 字段
+                            resolve(res.quantity);
+                        } else if (res.returncode === '-600') {
+                            resolve('-600');
                         } else {
-                            resolve('error')
-                            //console.log(JSON.parse(res.data).quantity)
+                            resolve('no-room');
                         }
                     } catch (e) {
                         console.log(e.message);
-                        wx.hideLoading();
-                        resolve('error')
+                        resolve('error');
                     }
-                },
-            })
+                })
+                .catch((err) => {
+                    console.log('请求超时：', err);
+                    wx.hideLoading(); // 关闭 loading 框
+                    wx.showToast({
+                        title: '请求超时请稍后重试，或联系客服',
+                        icon: 'none',
+                    });
+                    resolve('timeout'); // 返回 'timeout' 用于后续处理
+                });
         });
+
+    
+          
+        
         
         let avg = new Promise(function (resolve) {
             wx.request({
-                url: 'https://test.topxls.cn/avg.php?buildid='+building+'&roomid=' + room,
+                url: 'http://127.0.0.1:8080/getAvgPowerConsumptionToJson?buildingID=' + building +'&roomID='+ room,
                 method: "GET",
                 dataType: JSON,
                 success: (res) => {
+                    console.log(res.data)
                     //捕获json.pause异常
                     try {      
-                        resolve(JSON.parse(res.data))
+                        resolve(res.data)
                     } catch (e) {
                         console.log(e.message);
                         wx.hideLoading();
@@ -65,7 +112,7 @@ Page({
         
         p.then((data) => {
             //console.log(data)        
-            if (data == 'error') {
+            if (data == 'no-room') {
                 wx.hideLoading();
                 wx.showModal({
                     title: '输错了哦',
@@ -79,7 +126,10 @@ Page({
                     content: '系统维护中，请稍后重试',
                     showCancel:false,
                 })
-            } else {
+            } else if(data=='timeout'){
+                return
+            }
+            else {
                 wx.hideLoading();
                 this.setData({
                     shengyu: '剩余电量',
@@ -91,45 +141,41 @@ Page({
                 getApp().globalData.room=room;
                 getApp().globalData.todaypower=data;
             }
-            avg.then((data) => {     
-                if(data!=''){
-                    data="近七天日平均用电"+data+"度"
-                    this.setData({
-                        avg: data,
-                    }) 
-                }       
+
         });
-        });
+        avg.then((data) => {     
+            if(data!=''){
+                data="近七天日平均用电"+data+"度"
+                this.setData({
+                    avg: data,
+                }) 
+            }       
+    });
         
     },
     //点击查询后执行 
-    formSubmit(){
-        wx.showModal({
-            title: '对不起',
-            content: '由于域名过期正在重新备案中，届时小程序无法正常使用，望周知，大概1个月就好，我期待与你再相见',
-            showCancel: false, // 是否显示取消按钮，设为 false 表示不显示
-            success: function(res) {
-              if (res.confirm) {
-                console.log('用户点击确定');
-              }
-            }
-          });
-    }, 
-    // formSubmit(e) {
+    formSubmit(e) {
+        //清空页面已有的显示
+        this.setData({
+            avg: '',
+            shengyu: '',
+            kongtiao: '',
+            du: ''
+        }) 
         
-    //     let room = e.detail.value.room;
-    //     let building = e.detail.value.building.valueOf()
-    //     if (e.detail.value.building == -1 || e.detail.value.building == 0) {
-    //         wx.showModal({
-    //             title: '输错了哦',
-    //             content: '请输入正确的宿舍',
-    //             showCancel:false,
-    //         })
-    //         return false
-    //     }
-    //     // 执行查询
-    //     this.promiseClick(building, room)
-    // },
+        let room = e.detail.value.room;
+        let building = e.detail.value.building.valueOf()
+        if (e.detail.value.building == -1 || e.detail.value.building == 0) {
+            wx.showModal({
+                title: '输错了哦',
+                content: '请输入正确的宿舍',
+                showCancel:false,
+            })
+            return false
+        }
+        // 执行查询
+        this.promiseClick(building, room)
+    },
     bindPickerChange: function (e) {
         // console.log('picker发送选择改变，携带值为', e.detail.value)
         this.setData({
@@ -167,16 +213,6 @@ Page({
         )
      */
     onLoad(options) {
-        wx.showModal({
-            title: '对不起',
-            content: '由于域名过期正在重新备案中，届时小程序无法正常使用，望周知，大概1个月就好，我期待与你再相见',
-            showCancel: false, // 是否显示取消按钮，设为 false 表示不显示
-            success: function(res) {
-              if (res.confirm) {
-                console.log('用户点击确定');
-              }
-            }
-          });
     }
             
     ,

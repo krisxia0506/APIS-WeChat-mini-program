@@ -1,56 +1,19 @@
 import * as echarts from '../../ec-canvas/echarts';
 
 const app = getApp();
-//获取近七天日期
-function getDay(day) {
-    var today = new Date();
-    var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 * 24 * day;
-    today.setTime(targetday_milliseconds); //注意，这行是关键代码
-    var tMonth = today.getMonth();
-    var tDate = today.getDate();
-    tMonth = doHandleMonth(tMonth + 1);
-    tDate = doHandleMonth(tDate);
-    return tMonth + "-" + tDate;
-}
-function doHandleMonth(month) {
-    var m = month;
-    if (month.toString().length == 1) {
-        m = "0" + month;
-    }
-    return m;
-}
-//今天前7天
-function d7(){
-    const time=new Array;
-    for(var i=-6;i<=0;i++){
-    time.push(getDay(i))
-    }
-    return time
-}
-//昨天前7天
-function yd7(){
-    const time=new Array;
-    for(var i=-7;i<=-1;i++){
-    time.push(getDay(i))
-    }
-    return time
-}
-//上图表
+//上图表 历史电量
 var buidlid = app.globalData.building
-    var roomid = app.globalData.room
+var roomid = app.globalData.room
 function setOption(chart) {
-    var date7=d7();
     var buidlid = app.globalData.building
     var roomid = app.globalData.room
+    console.log(buidlid,roomid)
+
     let p = new Promise(function (resolve) {
+        
         wx.request({
-            url: 'https://test.topxls.cn/HistoricalElectricity.php?buildid=' + buidlid + '&roomid=' + roomid,
+            url: 'http://127.0.0.1:8080/getHistoricalElectricityToJson?buildingID=' + buidlid +'&roomID='+ roomid,
             method: "GET",
-            header: {
-                'Content-type': 'application/json;charset=UTF-8', // 默认值
-                'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-                'Cookie': 'PHPSESSID=153vno80441rmkbb88deela899'
-            },
             dataType: JSON,
             success: (res) => {
                 //捕获json.pause异常
@@ -66,7 +29,15 @@ function setOption(chart) {
     });
     p.then((data) => {
         // 今天电量显示当前查询的电量
-        data[6]=app.globalData.todaypower
+        
+
+// 提取 powerTable 数组中的 date 和 power 属性
+        var dateArray = data.powerTable.map(item => item.date);
+        var powerArray = data.powerTable.map(item => item.power);
+        powerArray[6]=app.globalData.todaypower
+        dateArray[6]='今天'
+        console.log("Dates:", dateArray);
+        console.log("Powers:", powerArray);
         const option = {
             title: {
                 text: buidlid + "-" + roomid + '历史电量曲线(Beta)',
@@ -90,7 +61,7 @@ function setOption(chart) {
                 type: 'category',// 坐标轴类型
                 name:"日期",// 坐标轴名
                 boundaryGap: false,//x 坐标轴两边不留白
-                data: date7,//设置 x 轴上的值。
+                data: dateArray,//设置 x 轴上的值。
             },
             yAxis: {
                 x: 'center',
@@ -109,27 +80,21 @@ function setOption(chart) {
                 name: '历史电量',
                 type: 'line',// 图形类型
                 smooth: true,// 线条平滑展示，折线图起作用
-                data: data// 数值
+                data: powerArray// 数值
             }]
         };
         chart.setOption(option);
     });
 }
 
-//下图表
+//下图表 历史耗电量
 function setOption2(chart) {
     var buidlid = app.globalData.building
     var roomid = app.globalData.room
-    var date7=yd7();
     let p = new Promise(function (resolve) {
         wx.request({
-            url: 'https://test.topxls.cn/PowerConsumption.php?buildid=' + buidlid + '&roomid=' + roomid,
+            url: 'http://127.0.0.1:8080/getPowerConsumptionToJson?buildingID=' + buidlid +'&roomID='+ roomid,
             method: "GET",
-            header: {
-                'Content-type': 'application/json;charset=UTF-8', // 默认值
-                'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-                'Cookie': 'PHPSESSID=153vno80441rmkbb88deela899'
-            },
             dataType: JSON,
             success: (res) => {
                 //捕获json.pause异常
@@ -144,7 +109,10 @@ function setOption2(chart) {
         })
     });
     p.then((data) => {
-
+        var dateArray = data.powerTable.map(item => item.date);
+        var powerArray = data.powerTable.map(item => item.power);
+        console.log("Dates:", dateArray);
+        console.log("Powers:", powerArray);
         const option = {
             title: {
                 text: buidlid + "-" + roomid + '近期耗电量曲线(Beta)',
@@ -168,7 +136,7 @@ function setOption2(chart) {
                 type: 'category',
                 name:"日期",
                 boundaryGap: false,
-                data: date7,
+                data: dateArray,
                 // show: false
             },
             yAxis: {
@@ -189,7 +157,7 @@ function setOption2(chart) {
                 name: '耗电量',
                 type: 'line',
                 smooth: true,
-                data: data
+                data: powerArray
             }]
         };
         chart.setOption(option);
