@@ -1,0 +1,90 @@
+/* pages/list.wxss */
+.title{
+    text-align: center;
+    font-size: 80rpx;
+    margin-top: 10rpx;
+}
+
+#inputroom{
+	margin: 10rpx 0 0 0 ;
+	
+}
+
+#inputroom input{
+	background-color: white;
+	border-radius:10px;
+    height: 80rpx;
+    width: 200rpx;
+    display: block;
+    margin: auto;
+    text-align: center;
+	border: 5rpx solid rgb(143, 143, 143);
+	font-style: red;
+	
+}
+.btn-area{
+    width: 100%;
+    text-align: center;
+    /* margin: auto; */
+}
+page{
+	width: 100%;
+	height: 100%;
+	background-color: #f7f7f7;
+	text-align: center;
+	/* margin: auto; */
+}
+.building{
+	background-color: white;
+	height: 100rpx;
+	text-align: center;
+	border-radius:10px;
+}
+.picker{
+	height: 100%;
+	margin: auto;
+	line-height: 100rpx;
+}
+.form{
+	display: block;
+	/* margin: 50px auto; */
+}
+
+.dianliang{
+    padding-left: 20rpx;
+    font-size: 100rpx;
+    
+}
+.avg{
+    padding-bottom: 80rpx;
+}
+#body{
+
+	height: 100%;
+}
+.power{
+    height: 280rpx;
+
+}
+.weui-footer{
+    /* float: left; */
+	height: 50rpx;
+	width: 100%;
+    position: fixed;
+    /* position:sticky; */
+	margin-bottom: 5rpx;
+	bottom: 0rpx;
+	color: rgb(141, 141, 141);
+	
+}
+#kf{
+	display:flex;
+	height: 40px;
+	width: 40px;
+	right: 5rpx;
+	/* top:100px; */
+	bottom: 20rpx;
+	position:fixed;
+	padding: 0;
+	
+}
