@@ -38,7 +38,7 @@ Page({
         wx.showLoading({
             title: '查询中',
         })
-        
+
         // 封装请求为 Promise
         function requestWithPromise(url, method) {
             return new Promise(function (resolve, reject) {
@@ -55,10 +55,10 @@ Page({
                 });
             });
         }
-        
+
         // 使用封装的请求函数
         let p = new Promise(function (resolve) {
-            requestWithPromise('http://localhost:8080/electricityLevel?buildingID=' + building + '&roomID=' + room, 'GET')
+            requestWithPromise('https://api.zqkspace.top/electricityLevel?buildingID=' + building + '&roomID=' + room, 'GET')
                 .then((res) => {
                     console.log(res);
                     try {
@@ -68,6 +68,9 @@ Page({
                             resolve(res.quantity);
                         } else if (res.returncode === '-600') {
                             resolve('-600');
+                        } else if (res.returncode === '400') {
+                            resolve('error')
+
                         } else {
                             resolve('no-room');
                         }
@@ -86,20 +89,15 @@ Page({
                     resolve('timeout'); // 返回 'timeout' 用于后续处理
                 });
         });
-
-    
-          
-        
-        
         let avg = new Promise(function (resolve) {
             wx.request({
-                url: 'http://127.0.0.1:8080/getAvgPowerConsumptionToJson?buildingID=' + building +'&roomID='+ room,
+                url: 'https://api.zqkspace.top/getAvgPowerConsumptionToJson?buildingID=' + building + '&roomID=' + room,
                 method: "GET",
                 dataType: JSON,
                 success: (res) => {
                     console.log(res.data)
                     //捕获json.pause异常
-                    try {      
+                    try {
                         resolve(res.data)
                     } catch (e) {
                         console.log(e.message);
@@ -109,7 +107,7 @@ Page({
                 },
             })
         });
-        
+
         p.then((data) => {
             //console.log(data)        
             if (data == 'no-room') {
@@ -117,41 +115,51 @@ Page({
                 wx.showModal({
                     title: '输错了哦',
                     content: '请输入正确的宿舍',
-                    showCancel:false,
+                    showCancel: false,
                 })
+                return
+            } else if(data == 'error'){
+                wx.hideLoading();
+                wx.showModal({
+                    title: '出错了',
+                    content: '请联系客服解决',
+                    showCancel: false,
+                })
+                return
             } else if (data == '-600') {
                 wx.hideLoading();
                 wx.showModal({
                     title: '系统维护',
                     content: '系统维护中，请稍后重试',
-                    showCancel:false,
+                    showCancel: false,
                 })
-            } else if(data=='timeout'){
                 return
-            }
-            else {
+            } else if (data == 'timeout') {
+                return
+            } else {
                 wx.hideLoading();
                 this.setData({
                     shengyu: '剩余电量',
                     kongtiao: data,
                     du: '度'
                 })
+                avg.then((data) => {
+                    if (data != '') {
+                        data = "近七天日平均用电" + data + "度"
+                        this.setData({
+                            avg: data,
+                        })
+                    }
+                });
                 // 传递参数给echarts
-                getApp().globalData.building=building;
-                getApp().globalData.room=room;
-                getApp().globalData.todaypower=data;
+                getApp().globalData.building = building;
+                getApp().globalData.room = room;
+                getApp().globalData.todaypower = data;
             }
 
         });
-        avg.then((data) => {     
-            if(data!=''){
-                data="近七天日平均用电"+data+"度"
-                this.setData({
-                    avg: data,
-                }) 
-            }       
-    });
         
+
     },
     //点击查询后执行 
     formSubmit(e) {
@@ -161,15 +169,15 @@ Page({
             shengyu: '',
             kongtiao: '',
             du: ''
-        }) 
-        
+        })
+
         let room = e.detail.value.room;
         let building = e.detail.value.building.valueOf()
         if (e.detail.value.building == -1 || e.detail.value.building == 0) {
             wx.showModal({
                 title: '输错了哦',
                 content: '请输入正确的宿舍',
-                showCancel:false,
+                showCancel: false,
             })
             return false
         }
@@ -188,7 +196,7 @@ Page({
         wx.showModal({
             title: '用前须知',
             content: '8号楼的ABCD区用1234代替\r例如A102房间号为1102\rB102房间号为2102\rC102房间号为3102\rD102房间号为4102\r若需充值电量可前往\r完美校园APP-缴费-预缴费处缴费\r到账时间1-3分钟，单价0.5元/度',
-            showCancel:false,
+            showCancel: false,
         })
     },
 
@@ -202,9 +210,9 @@ Page({
         index: 0,
         kongtiao: '',
         du: '',
-        avg:''
+        avg: ''
     },
-    
+
 
 
     /**
@@ -212,9 +220,8 @@ Page({
      * (
         )
      */
-    onLoad(options) {
-    }
-            
+    onLoad(options) {}
+
     ,
 
     /**

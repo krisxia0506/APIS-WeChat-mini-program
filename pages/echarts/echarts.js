@@ -13,7 +13,7 @@ function setOption(chart) {
     let p = new Promise(function (resolve) {
 
         wx.request({
-            url: 'http://127.0.0.1:8080/getHistoricalElectricityToJson?buildingID=' + buidlid + '&roomID=' + roomid,
+            url: 'https://api.zqkspace.top/getHistoricalElectricityToJson?buildingID=' + buidlid + '&roomID=' + roomid,
             method: "GET",
             dataType: JSON,
             success: (res) => {
@@ -94,7 +94,7 @@ function setOption2(chart) {
     var roomid = app.globalData.room
     let p = new Promise(function (resolve) {
         wx.request({
-            url: 'http://127.0.0.1:8080/getPowerConsumptionToJson?buildingID=' + buidlid + '&roomID=' + roomid,
+            url: 'https://api.zqkspace.top/getPowerConsumptionToJson?buildingID=' + buidlid + '&roomID=' + roomid,
             method: "GET",
             dataType: JSON,
             success: (res) => {
