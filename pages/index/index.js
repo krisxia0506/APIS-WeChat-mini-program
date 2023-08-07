@@ -2,39 +2,6 @@
 Page({
     promiseClick(building, room) {
 
-        // wx.showLoading({
-        //     title: '查询中',
-        // })
-        // //console.log('楼号选择是',building_id2post[1])
-        // let p = new Promise(function (resolve) {
-        //     wx.request({
-        //         url: 'http://localhost:80801/electricityLevel?buildingID=' + building +'&roomID='+ room,
-        //         method: "GET",
-        //         dataType: JSON,
-        //         success: (res) => {
-        //             console.log(res.data)
-        //             //捕获json.pause异常
-        //             try {
-        //                 //判断查询结果json的returncode字段
-        //                 if (JSON.parse(res.data).returncode == '100') {
-        //                     //查询成果返回json的quantity字段 
-        //                     resolve(JSON.parse(res.data).quantity)
-        //                 } else if (JSON.parse(res.data).returncode == '-600') {
-        //                     resolve('-600')
-        //                 } else {
-        //                     resolve('no-room')
-        //                     //console.log(JSON.parse(res.data).quantity)
-        //                 }
-        //             } catch (e) {
-        //                 console.log(e.message);
-        //                 wx.hideLoading();
-        //                 resolve('error')
-        //             }
-        //         },
-
-        //     })
-        // });
-        // 方法1
         wx.showLoading({
             title: '查询中',
         })

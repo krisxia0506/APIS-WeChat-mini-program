@@ -16,8 +16,8 @@
       
   </view>
   <view class="aboutMe">
-  <button bindtap="aboutMe" class="aboutMebu">
-    <view>发现新版本！</view>
+  <button bindtap="aboutMe" class="aboutMebu" >
+    <view>！！重要通知！！</view>
   </button>
     
   </view>
@@ -39,17 +39,27 @@
   </view>
   <view class="aboutMe">
   <button bindtap="aboutMe" class="aboutMebu">
-    <view>发现新版本！</view>
+    <view>重要通知</view>
   </button>
     
   </view>
   <view class="loginOut" bindtap="loginOut">
        <button>退出登录</button>
   </view>
-  
+
 </block>
+<view/>
+<view id="thankview" style="display: block;">
+    <view id="thank" style="position: relative; left: 61rpx; top: 0rpx; width: 630rpx; height: 184rpx; display: block; box-sizing: border-box">感谢大家对这个小程序的支持，学校总共有17090位全日制在校生，截止2023/8/6小程序累计用户3860人，占比22.5%。
+通过开屏广告累计收入24.14元，全部投入服务器维护中，本人也通过这个小程序找到了一个不错的实习工作。</view>
+</view>
+<view style="display: block;">
+    <button bindtap="zhixie">致谢名单</button>
+</view>
+
 <view class="weui-footer">
-<view>Version 4.3.1</view>
-<view  class="weui-footer__text">Copyright © 2022 topxls.cn && Choice37</view>
+<view>Version 5.0.1</view>
+<view  class="weui-footer__text">Copyright © 2023 夏佳怡 && Choice37</view>
+
 </view>
 </view> 

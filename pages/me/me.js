@@ -103,9 +103,28 @@
      },
      aboutMe() {
         wx.showModal({
-            title: '发现新版本！',
-            content: '跟你说个事，不要和别人讲啊！哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈我谈恋爱了',
+            title: '重要通知',
+            content: '我要毕业了，找热爱开发的同学承接这个小程序，直接在 首页右下角 的客服联系我',
+           showCancel:true,
+           cancelText:'默默支持',
+           confirmText:'去发简历',
+        })
+    },
+    onShow: function () {
+        try {
+            this.aboutMe();
+        } catch {
+            console.log("onshow首次加载失败")
+        }
+    },
+    zhixie(){
+        wx.showModal({
+            title: '致谢名单(排名不分前后)',
+            content: 'Choice37\rawwaawwa\rcccccjjjjkkkk\ranlulu\rmsn\rzqk\rww',
            showCancel:false,
+           cancelText:'默默支持',
+           confirmText:'点赞',
         })
     }
  })
+ 
